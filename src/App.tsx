@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 /* ─── Project Data ─── */
 
 const hola2: ProjectData = {
+  _idPrefix: 'hola2',
   title: 'HOLA 2.0',
   subtitle: '이동통신사 운용 통신 장비 자동화 및 관리 플랫폼 (SI)',
   tech: ['Next.js', 'TypeScript', 'React Query', 'Zustand', 'WebSocket', 'Kubernetes', 'Docker'],
@@ -26,8 +27,8 @@ const hola2: ProjectData = {
         afterValue: '7.8MB → 25.7MB',
       },
       screenshots: {
-        beforeImg: '/images/memory-before.png',
-        afterImg: '/images/memory-after.png',
+        beforeImg: `${import.meta.env.BASE_URL}images/memory-before.png`,
+        afterImg: `${import.meta.env.BASE_URL}images/memory-after.png`,
         beforeAlt: 'V8 메모리 프로파일 - GC 톱니 패턴으로 382MB까지 증가',
         afterAlt: 'V8 메모리 프로파일 - 안정적으로 25.7MB 유지',
       },
@@ -173,7 +174,7 @@ export const useWorkStore =
     },
   ],
   technicalDepth: [
-    'WebSocket 실시간 로그 처리 로직을 커스텀 훅으로 추상화하여 재사용성 강화',
+    'WebSocket 실시간 로그 처리 로직을 추상화 계층으로 분리, 화면 간 재사용 구조 확보',
     'IE11부터 최신 브라우저까지 일관된 UI/UX를 위한 크로스 브라우징 대응',
     'Docker 이미지 빌드 및 Kubernetes 환경 배포 프로세스 수행',
   ],
@@ -186,6 +187,7 @@ export const useWorkStore =
 }
 
 const cloudxpm: ProjectData = {
+  _idPrefix: 'cloudxpm',
   title: 'CloudXPM',
   subtitle: '모바일 원격 제어 및 No-Code 테스트 자동화 플랫폼 (자사 서비스)',
   tech: [
@@ -210,8 +212,8 @@ const cloudxpm: ProjectData = {
         afterValue: '4.9ms',
       },
       screenshots: {
-        beforeImg: '/images/profiler-before.png',
-        afterImg: '/images/profiler-after.png',
+        beforeImg: `${import.meta.env.BASE_URL}images/profiler-before.png`,
+        afterImg: `${import.meta.env.BASE_URL}images/profiler-after.png`,
         beforeAlt: 'React Profiler - Render 46.6ms, Passive effects 54.3ms',
         afterAlt: 'React Profiler - Render 4.9ms, Passive effects 0.2ms',
       },
@@ -240,6 +242,7 @@ const cloudxpm: ProjectData = {
 }
 
 const watchman: ProjectData = {
+  _idPrefix: 'watchman',
   title: 'WatchMAN+',
   subtitle: 'API 요청 테스트 및 모바일/웹 시나리오 모니터링 플랫폼 (SI)',
   tech: ['React', 'TypeScript', 'Redux', 'Redux-Saga', 'Styled-components', 'MUI', 'Docker', 'Nginx'],
@@ -330,10 +333,10 @@ const sideProjects = [
 
 const skills = {
   strengths: [
-    '대용량/실시간 데이터 처리',
-    '성능 최적화 (메모리, 렌더링)',
-    '레거시 마이그레이션 (Vue→React, JS→TS)',
-    '개발환경/배포 (Docker, K8s)',
+    { label: '대용량/실시간 데이터 처리', target: 'hola2-achievement-0' },
+    { label: '성능 최적화 (메모리, 렌더링)', target: 'cloudxpm-achievement-0' },
+    { label: '레거시 마이그레이션 (Vue→React, JS→TS)', target: 'watchman-achievement-0' },
+    { label: '개발환경/배포 (Docker, K8s)', target: 'hola2-depth' },
   ],
   stack: [
     { category: 'Frontend', items: ['Next.js', 'TypeScript', 'React', 'React Query', 'Zustand', 'Recoil', 'Redux'] },
@@ -401,9 +404,37 @@ export default function App() {
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">주요 역량</h3>
                 <div className="space-y-2">
                   {skills.strengths.map((s) => (
-                    <div key={s} className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-2.5">
-                      <span className="w-2 h-2 bg-primary-500 rounded-full shrink-0" />
-                      <span className="text-sm font-bold text-slate-900">{s}</span>
+                    <div
+                      key={s.label}
+                      onClick={() => {
+                        const el = document.getElementById(s.target)
+                        if (!el) return
+                        // 기술적 깊이 섹션이면 자동으로 펼치기
+                        if (s.target.endsWith('-depth')) {
+                          const btn = el.querySelector('button')
+                          const list = el.querySelector('ul')
+                          if (btn && !list) btn.click()
+                        }
+                        setTimeout(() => {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                          el.style.transition = 'transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease'
+                          el.style.transform = 'scale(1.02)'
+                          el.style.boxShadow = '0 0 0 2px rgba(147,197,253,0.5), 0 4px 20px rgba(59,130,246,0.1)'
+                          el.style.background = '#eff6ff'
+                          setTimeout(() => {
+                            el.style.transform = 'scale(1)'
+                            el.style.boxShadow = 'none'
+                            el.style.background = ''
+                          }, 2000)
+                        }, 100)
+                      }}
+                      className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-2.5 cursor-pointer hover:border-primary-300 hover:bg-primary-50/50 transition-all group"
+                    >
+                      <span className="w-2 h-2 bg-primary-500 rounded-full shrink-0 group-hover:scale-125 transition-transform" />
+                      <span className="text-sm font-bold text-slate-900 group-hover:text-primary-700 transition-colors">{s.label}</span>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="ml-auto text-slate-300 group-hover:text-primary-500 transition-colors shrink-0">
+                        <path d="M7 17L17 7M17 7H7M17 7v10" />
+                      </svg>
                     </div>
                   ))}
                 </div>
@@ -457,9 +488,9 @@ export default function App() {
               </div>
             </div>
             <div className="space-y-6 ml-0 md:ml-[52px]">
-              <ProjectCard project={hola2} />
-              <ProjectCard project={cloudxpm} />
-              <ProjectCard project={watchman} />
+              <ProjectCard project={hola2} id="project-hola2" />
+              <ProjectCard project={cloudxpm} id="project-cloudxpm" />
+              <ProjectCard project={watchman} id="project-watchman" />
             </div>
           </div>
 
@@ -472,10 +503,11 @@ export default function App() {
               <div>
                 <h3 className="font-bold text-slate-900">GSInstech</h3>
                 <p className="text-xs text-slate-400">프론트엔드 개발자 | 2018.12 ~ 2021.08</p>
+                <p className="text-xs text-slate-400 italic">입사 초기(2018.12 ~ 2020.07)에는 웹 퍼블리싱 및 임베디드 시스템 개발 담당</p>
               </div>
             </div>
             <div className="ml-0 md:ml-[52px]">
-              <ProjectCard project={gsInstech} />
+              <ProjectCard project={gsInstech} id="project-gsinstech" />
             </div>
           </div>
         </div>

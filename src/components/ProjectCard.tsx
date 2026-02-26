@@ -45,6 +45,7 @@ export interface ProjectData {
   achievements: Achievement[]
   technicalDepth: string[]
   learningPoints: string[]
+  _idPrefix?: string
 }
 
 function MetricCard({ metric }: { metric: Metric }) {
@@ -64,9 +65,9 @@ function MetricCard({ metric }: { metric: Metric }) {
   )
 }
 
-function AchievementSection({ achievement, index }: { achievement: Achievement; index: number }) {
+function AchievementSection({ achievement, index, id }: { achievement: Achievement; index: number; id?: string }) {
   return (
-    <div className="mb-6 last:mb-0">
+    <div id={id} className="mb-6 last:mb-0 rounded-lg transition-all duration-500">
       <h4 className="text-sm font-bold text-slate-800 flex items-start gap-2 mb-3">
         <span className="shrink-0 w-5 h-5 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-[11px] font-bold mt-px">
           {index + 1}
@@ -135,12 +136,12 @@ function AchievementSection({ achievement, index }: { achievement: Achievement; 
   )
 }
 
-export default function ProjectCard({ project }: { project: ProjectData }) {
+export default function ProjectCard({ project, id }: { project: ProjectData; id?: string }) {
   const [showDepth, setShowDepth] = useState(false)
   const [showLearning, setShowLearning] = useState(false)
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div id={id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-500">
       <div className="p-6 md:p-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
@@ -176,12 +177,12 @@ export default function ProjectCard({ project }: { project: ProjectData }) {
             핵심 성과
           </h4>
           {project.achievements.map((a, i) => (
-            <AchievementSection key={i} achievement={a} index={i} />
+            <AchievementSection key={i} achievement={a} index={i} id={project._idPrefix ? `${project._idPrefix}-achievement-${i}` : undefined} />
           ))}
         </div>
 
         {/* Technical Depth - Collapsible */}
-        <div className="border-t border-slate-100 pt-4 mt-4">
+        <div id={project._idPrefix ? `${project._idPrefix}-depth` : undefined} className="border-t border-slate-100 pt-4 mt-4 rounded-lg transition-all duration-500">
           <button
             onClick={() => setShowDepth(!showDepth)}
             className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors w-full"
