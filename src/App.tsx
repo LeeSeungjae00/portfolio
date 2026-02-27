@@ -8,7 +8,7 @@ const hola2: ProjectData = {
   _idPrefix: 'hola2',
   title: 'HOLA 2.0',
   subtitle: '이동통신사 운용 통신 장비 자동화 및 관리 플랫폼 (SI)',
-  tech: ['Next.js', 'TypeScript', 'React Query', 'Zustand', 'WebSocket', 'Kubernetes', 'Docker'],
+  tech: ['Next.js', 'TypeScript', 'React Query', 'Zustand', 'WebSocket', 'Kubernetes', 'Docker', 'AG Grid'],
   period: '2024.03 ~ 현재',
   contribution: '프론트엔드 100% (단독)',
   achievements: [
@@ -192,7 +192,7 @@ const cloudxpm: ProjectData = {
   subtitle: '모바일 원격 제어 및 No-Code 테스트 자동화 플랫폼 (자사 서비스)',
   tech: [
     'Next.js', 'TypeScript', 'Recoil', 'React Query',
-    'Jest', 'Testing Library', 'SSE', 'Express.js', 'Styled-components',
+    'Jest', 'Testing Library', 'SSE', 'Express.js', 'Styled-components', 'MUI',
   ],
   period: '2023.03 ~ 2024.03',
   contribution: '프론트엔드 70% (리드, 협업 1명)',
