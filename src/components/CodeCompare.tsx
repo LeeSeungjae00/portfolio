@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Highlight, themes } from 'prism-react-renderer'
 
 interface CodeCompareProps {
   title: string
@@ -8,6 +9,7 @@ interface CodeCompareProps {
   afterCode: string
   beforeCaption?: string
   afterCaption?: string
+  language?: string
 }
 
 export default function CodeCompare({
@@ -18,8 +20,10 @@ export default function CodeCompare({
   afterCode,
   beforeCaption,
   afterCaption,
+  language = 'typescript',
 }: CodeCompareProps) {
   const [tab, setTab] = useState<'before' | 'after'>('before')
+  const code = tab === 'before' ? beforeCode : afterCode
 
   return (
     <div className="mt-4 rounded-xl overflow-hidden border border-slate-200">
@@ -63,13 +67,24 @@ export default function CodeCompare({
         </div>
       )}
 
-      <div className="bg-[#1e293b] p-4 overflow-x-auto">
-        <pre className="m-0">
-          <code className="text-slate-300 whitespace-pre">
-            {tab === 'before' ? beforeCode : afterCode}
-          </code>
-        </pre>
-      </div>
+      <Highlight theme={themes.nightOwl} code={code.trim()} language={language}>
+        {({ style, tokens, getLineProps, getTokenProps }) => (
+          <pre className="m-0 p-4 overflow-x-auto" style={{ ...style, margin: 0 }}>
+            {tokens.map((line, i) => (
+              <div key={i} {...getLineProps({ line })} className="table-row">
+                <span className="table-cell pr-4 text-right select-none opacity-40 text-xs">
+                  {i + 1}
+                </span>
+                <span className="table-cell">
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token })} />
+                  ))}
+                </span>
+              </div>
+            ))}
+          </pre>
+        )}
+      </Highlight>
     </div>
   )
 }
