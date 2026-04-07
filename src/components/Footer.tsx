@@ -9,14 +9,14 @@ export default function Footer() {
 
         <div className="flex flex-wrap justify-center gap-6 mb-12">
           <a
-            href="mailto:seungjae266789@naver.com"
+            href="mailto:seungjae2668@naver.com"
             className="flex items-center gap-2 px-5 py-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
           >
             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
               <path d="M22 6l-10 7L2 6" />
             </svg>
-            <span className="text-sm">seungjae266789@naver.com</span>
+            <span className="text-sm">seungjae2668@naver.com</span>
           </a>
           <a
             href="https://github.com/LeeSeungjae00"
