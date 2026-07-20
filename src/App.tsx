@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import Header from './components/Header'
 import ProjectCard, { type ProjectData } from './components/ProjectCard'
 import Footer from './components/Footer'
@@ -385,6 +386,15 @@ const skills = {
 /* ─── App ─── */
 
 export default function App() {
+  useEffect(() => {
+    if (!window.location.hash) return
+    const id = window.location.hash.slice(1)
+    const scrollToTarget = () => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'instant', block: 'start' })
+    }
+    requestAnimationFrame(() => requestAnimationFrame(scrollToTarget))
+  }, [])
+
   return (
     <div className="min-h-screen">
       <Header />
