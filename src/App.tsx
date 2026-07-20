@@ -8,7 +8,7 @@ const hola2: ProjectData = {
   _idPrefix: 'hola2',
   title: 'HOLA 2.0',
   subtitle: '이동통신사 운용 통신 장비 자동화 및 관리 플랫폼 (SI)',
-  tech: ['Next.js', 'TypeScript', 'React Query', 'Zustand', 'WebSocket', 'Kubernetes', 'Docker', 'AG Grid'],
+  tech: ['Next.js', 'TypeScript', 'React Query', 'Jotai', 'WebSocket', 'Kubernetes', 'Docker', 'AG Grid', 'pnpm', 'Jest', 'Testing Library'],
   period: '2024.03 ~ 현재',
   contribution: '프론트엔드 100% (단독)',
   achievements: [
@@ -91,24 +91,19 @@ const hola2: ProjectData = {
       },
     },
     {
-      title: 'Recoil → Zustand 상태 관리 마이그레이션',
+      title: 'Recoil → Jotai 상태 관리 마이그레이션',
       problem:
         'Recoil의 실험적 상태 및 업데이트 불확실성, atom/selector 기반 보일러플레이트로 복잡도 증가',
-      action: 'Zustand 스토어 기반 구조로 리팩토링. Recoil atom을 점진 이관',
+      action:
+        'Jotai 원자(atom) 기반 구조로 리팩토링. Recoil atom을 점진적으로 이관',
       result:
-        '번들 사이즈 96% 감소 (79KB → 2.9KB), 상태 로직 단순화, 가독성 및 유지보수성 향상',
-      metrics: {
-        beforeLabel: '번들 사이즈',
-        beforeValue: '79KB',
-        afterLabel: '번들 사이즈',
-        afterValue: '2.9KB',
-      },
+        'atom별 key 문자열 관리가 불필요해지고, selector 없이도 atomWithReset과 write-only atom 조합으로 파생·리셋 로직을 표현 — 상태 정의가 단순해지고 가독성·유지보수성 향상',
       code: {
-        title: 'Store 정의: atom 5개 + selector → store 1개',
+        title: 'Store 정의: atom 5개 + selector → atomWithReset 기반 정의',
         beforeLabel: 'Recoil',
-        afterLabel: 'Zustand',
+        afterLabel: 'Jotai',
         beforeCaption: 'atom마다 key 수동 관리, selector로 부분 업데이트 우회',
-        afterCaption: 'key 관리 불필요, 1개 파일에 상태+액션 통합',
+        afterCaption: 'key 관리 불필요, atomWithReset으로 리셋 로직까지 atom 레벨에서 처리',
         beforeCode: `// store/atom/work.ts
 export const worksRegisterState =
   atom<WorkRegisterParams>({
@@ -140,32 +135,67 @@ export const worksRegisterDataSelector =
       });
     },
   });`,
-        afterCode: `// stores/useWorkStore.ts
-export const useWorkStore =
-  create<WorkState>((set) => ({
-    register: {
-      name: "", date: "...", ...
-    },
-    targetTab: "엑셀",
-    rollbackHosts: [],
-    workLog: {},
+        afterCode: `// store/atom/work.ts — key 관리 불필요
+import { atomWithReset } from "jotai/utils";
 
-    updateRegister: (data) =>
-      set((s) => ({
-        register: { ...s.register, ...data }
-      })),
+export const worksRegisterAtom =
+  atomWithReset<WorkRegisterParams>({
+    name: "", date: "...", ...
+  });
 
-    setTargetTab: (tab) =>
-      set({ targetTab: tab }),
+export const workRegisterTargetTabAtom =
+  atomWithReset<string>("엑셀");
 
-    reset: () => set({
-      register: initialRegister,
-      targetTab: "엑셀",
-      rollbackHosts: [],
-      workLog: {},
-    }),
-  }));`,
+export const rollbackAtom =
+  atomWithReset<WorkHost[]>([]);
+
+// 파생 업데이트는 write-only atom으로 대체
+export const updateWorksRegisterAtom = atom(
+  null,
+  (get, set, patch: Partial<WorkRegisterParams>) => {
+    set(worksRegisterAtom, {
+      ...get(worksRegisterAtom),
+      ...patch,
+    });
+  }
+);`,
       },
+    },
+    {
+      title: 'OTDR 프로젝트 통합 — pnpm 모노레포 전환',
+      problem:
+        '이미 개발되어 있던 신규 프로젝트 OTDR이 HOLA에 편입. 같은 메뉴·라우팅, 인증 모듈, 토큰 갱신 로직, UI look & feel을 공유해야 했으나 HOLA(Next.js)와 OTDR(Vite+React)이 별도 코드베이스로 존재해 공통 로직 중복 발생',
+      action:
+        'pnpm workspace 기반 모노레포로 우선 통합한 뒤, 공통 모듈(네비게이션, 인증, 토큰 갱신, 디자인 시스템)을 점진적으로 추출해 공유 패키지화. 기존 git 커밋 이력을 보존하며 전환, Next.js와 React(Vite) 간 컴포넌트 구현 차이를 흡수하는 공유 컴포넌트 경계 설계',
+      result:
+        '네비게이션·인증 모듈 일원화로 한 곳만 수정해도 두 프로젝트에 동시 반영되는 구조 확보. 코드 중복 제거로 유지보수 비용 감소',
+    },
+    {
+      title: '테스트 코드 도입 — 페이지별 통합 테스트 + CRUD 템플릿',
+      problem:
+        'SKT의 보안 정책 강화로 소스코드 취약점 검사가 잦아졌고, AG Grid·Next.js·React 등 핵심 패키지에서 취약점이 발견될 때마다 업데이트 후 전 페이지 수동 전수 테스트가 필요해 하루가 소요됨',
+      action:
+        'Jest + Testing Library로 페이지별 통합 테스트 구축. 생성·조회·수정·삭제(CRUD) 공통 테스트 템플릿을 만들고, 각 도메인 특성에 맞게 커스터마이징하는 방식으로 작성 효율화',
+      result:
+        '패키지 업데이트 시 검증 시간 1일 → 5분으로 단축',
+    },
+    {
+      title: 'AI Aside 기반 배포 전 E2E 검증 자동화',
+      problem:
+        'QA 팀 없이 개발자가 QA를 병행하는 구조에서, Jira 릴리즈에 버그 수정·신규 기능이 한 번에 여러 건 묶여 배포되다 보니 수정 누락이나 운용자가 발견하는 버그(PN 이슈)가 잦았음',
+      action:
+        'AI 브라우저 에이전트 Aside(https://aside.com/)를 도입해 배포 전날 Jira 릴리즈 목록을 가져와 항목별로 직접 검증, 캡처와 수정 내용을 자동 기록하는 프로세스 구축',
+      result:
+        '운용자 발견 버그(PN 이슈) 월평균 10건 → 0~1건으로 감소, 배포 전 확인 절차 간소화',
+    },
+    {
+      title: '레거시 툴체인 현대화 — npm → pnpm 전환',
+      problem:
+        'npm에서 pnpm으로 전환하는 과정에서, 정작 어떤 패키지가 무엇을 위해 실행하는지도 몰랐던 postinstall 스크립트들의 존재를 발견. 그중 콘솔에 불필요한 광고성 메시지를 출력하는 등 실질적으로 필요 없는 postinstall이 다수 포함되어 있었음',
+      action:
+        '전체 postinstall 스크립트를 점검해 불필요한 것(광고성 출력 등)은 제거하고, 실제로 필요한 것만 남기거나 추가. 같은 시기 Recoil → Jotai 전환도 함께 진행',
+      result:
+        '설치 과정 정리, 불필요한 스크립트 실행 제거로 install 효율 개선',
     },
     {
       title: 'Vue → React 기술 전환',
@@ -177,12 +207,18 @@ export const useWorkStore =
     'WebSocket 실시간 로그 처리 로직을 추상화 계층으로 분리, 화면 간 재사용 구조 확보',
     'IE11부터 최신 브라우저까지 일관된 UI/UX를 위한 크로스 브라우징 대응',
     'Docker 이미지 빌드 및 Kubernetes 환경 배포 프로세스 수행',
+    'CI/배포 경로 재구성 및 Next.js/Vite+React 간 공유 컴포넌트 구현 차이 대응 (모노레포 통합)',
+    'Jest + Testing Library 기반 페이지별 통합 테스트와 CRUD 공통 템플릿 설계',
+    'AI 브라우저 에이전트(Aside) 기반 Jira 릴리즈 검증 자동화 파이프라인 구축',
   ],
   learningPoints: [
     'V8 메모리 관리 메커니즘을 실무 최적화에 적용하며 저수준 최적화의 중요성 체감',
     '빅뱅 전환이 아닌 기능 단위 점진 전환의 효과 경험',
     '프론트엔드 개발자도 인프라(K8s, 배포)를 이해해야 하는 이유를 실감',
     '라이브러리 선택 시 커뮤니티 활성도, 유지보수성, 번들 사이즈, DX까지 고려하는 기준 확립',
+    '모노레포 전환은 빅뱅이 아닌 공통 모듈 점진 추출로 리스크를 낮출 수 있음을 체감',
+    'QA 인력 없이도 AI 에이전트를 동료처럼 활용해 품질 프로세스를 구축할 수 있음을 경험',
+    '의존성 설치 과정에서 인지하지 못했던 postinstall 스크립트의 존재를 발견 — 패키지 도입 시 설치 스크립트까지 검토하는 습관 형성',
   ],
 }
 
@@ -339,7 +375,7 @@ const skills = {
     { label: '개발환경/배포 (Docker, K8s)', target: 'hola2-depth' },
   ],
   stack: [
-    { category: 'Frontend', items: ['Next.js', 'TypeScript', 'React', 'React Query', 'Zustand', 'Recoil', 'Redux'] },
+    { category: 'Frontend', items: ['Next.js', 'TypeScript', 'React', 'React Query', 'Jotai', 'Recoil', 'Redux'] },
     { category: 'Styling', items: ['Styled-components', 'TailwindCSS', 'MUI'] },
     { category: 'Testing', items: ['Jest', 'Testing Library', 'Appium'] },
     { category: 'Infra', items: ['Docker', 'Kubernetes', 'Nginx', 'Express.js'] },
