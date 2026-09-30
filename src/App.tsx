@@ -16,11 +16,11 @@ const hola2: ProjectData = {
     {
       title: '대용량 실시간 데이터 처리 + 메모리 최적화',
       problem:
-        '수천 대 장비의 실시간 데이터 처리 중 메모리 급증, 빈번한 GC로 브라우저 멈춤 발생',
+        '수천 대 장비의 실시간 로그가 WebSocket으로 초당 수천 건 유입. 갱신마다 전체 배열을 복사하며 메모리가 급증하고, 빈번한 GC로 브라우저 멈춤 발생',
       action:
-        'V8 Heap 구조(Young/Old)를 분석하고, 불필요한 객체 생성을 억제. Typed Array 및 Object Pooling으로 할당 효율 개선',
+        'V8 Heap 구조(Young/Old)를 분석해 GC 유발 지점을 특정. 장비 목록을 배열에서 Map으로 전환해 조회를 O(1)로 만들고, 갱신마다 일어나던 전체 배열 재생성을 제거. 230개 필드를 통째로 복사하는 대신 변경된 필드만 기존 객체에 직접 반영',
       result:
-        '메모리 누수 차단 및 GC 부하 감소. 실시간 스트리밍 환경에서도 프레임 드랍 없이 대시보드 시각화 안정화',
+        '불필요한 객체·배열 할당 제거로 GC 부하 감소. 실시간 스트리밍 환경에서도 프레임 드랍 없이 대시보드 시각화 안정화',
       metrics: {
         beforeLabel: 'JS Heap',
         beforeValue: '9.3MB → 382MB',
@@ -427,7 +427,7 @@ export default function App() {
               GitHub
             </a>
             <a
-              href="mailto:seungjae266789@naver.com"
+              href="mailto:seungjae2668@naver.com"
               className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:border-slate-400 hover:bg-slate-50 transition-colors"
             >
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
